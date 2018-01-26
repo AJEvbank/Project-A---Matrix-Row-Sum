@@ -8,8 +8,11 @@ int main(int argc, char ** argv)
   int world_size;
   MPI_Comm_size(MCW, &world_size);
   MPI_Status status_1;
+  unsigned long rows,cols,seed;
 
-  printf("worldsize = %d, worldrank = %d\n",world_size,world_rank);
+  CommLineArgs(argc,argv,&rows,&cols,&seed);
+
+  printf("worldsize = %d, worldrank = %d, rows = %lu, cols = %lu, seed = %lu\n",world_size,world_rank,rows,cols,seed);
 
 
 

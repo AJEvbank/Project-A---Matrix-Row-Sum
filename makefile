@@ -1,2 +1,2 @@
 all:
-	mpicc -Wall main.c main.h -o main -lm
+	mpicc -Wall main.c main.h Comm_Line.c -o main -lm
