@@ -19,48 +19,11 @@ int main(int argc, char ** argv)
   char message[20];
   if(world_rank == 0)
   {
-    strcpy(message,"Hello, world,");
-    sender = world_size - 1;
-    recipient = 0;
-    MPI_Send(message,
-             strlen(message),
-             MPI_CHAR,
-             (world_rank + 1) % world_size,
-             message_id,
-             MCW
-            );
-    MPI_Recv(
-             message,
-             20,
-             MPI_CHAR,
-             sender,
-             message_id,
-             MCW,
-             &status_1
-            );
-    printf("%s from %d on %d!\n",message,sender,recipient);
+
   }
   else
   {
-    sender = world_rank - 1;
-    recipient = world_rank;
-    MPI_Recv(
-             message,
-             20,
-             MPI_CHAR,
-             sender,
-             message_id,
-             MCW,
-             &status_1
-            );
-    printf("%s from %d on %d!\n",message,sender,recipient);
-    MPI_Send(message,
-             20,
-             MPI_CHAR,
-             (world_rank + 1) % world_size,
-             message_id,
-             MCW
-            );
+    
   }
 
 
