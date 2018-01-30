@@ -16,6 +16,7 @@
 #define ROWS 10000
 #define COLS 1000
 #define SEED 1
+#define GRAN 2500
 
 enum isNumStates {
 	INITIAL,
@@ -30,7 +31,8 @@ void CommLineArgs(int argc,
                   char ** argv,
                   unsigned long *rows,
                   unsigned long *cols,
-                  unsigned long *seed
+                  unsigned long *seed,
+									unsigned long *gran
                 );
 
 int isNumber(const char * str);
