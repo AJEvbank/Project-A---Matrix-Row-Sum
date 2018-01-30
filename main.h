@@ -14,7 +14,7 @@
 
 #define MCW MPI_COMM_WORLD
 #define ROWS 10000
-#define COLS 1000
+#define COLS 10000
 #define SEED 1
 #define GRAN 2500
 
