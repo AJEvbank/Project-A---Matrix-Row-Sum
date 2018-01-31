@@ -16,7 +16,7 @@
 #define ROWS 10000
 #define COLS 10000
 #define SEED 1
-#define GRAN 2500
+#define GRAN 100
 #define QUAN 1
 
 enum isNumStates {

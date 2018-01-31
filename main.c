@@ -7,7 +7,6 @@ int main(int argc, char ** argv)
   MPI_Comm_rank(MCW, &world_rank);
   int world_size;
   MPI_Comm_size(MCW, &world_size);
-  // MPI_Status status_1;
   unsigned long rows,cols,seed,gran;
 
   CommLineArgs(argc,argv,&rows,&cols,&seed,&gran);
@@ -16,8 +15,7 @@ int main(int argc, char ** argv)
   int i,j,k,m,r = 0,stride = (rows/4),lineStart;
 
   // Allocate space for arrays.
-    // MPI_Request array for matrix.
-    MPI_Request * req = (MPI_Request *)calloc(stride/gran,sizeof(MPI_Request));
+
 
   MPI_Barrier(MCW);
 
@@ -27,11 +25,13 @@ int main(int argc, char ** argv)
     // Allocate space for final sum array.
     int * finalSums = (int *)calloc(rows,sizeof(int));
     // Allocate space for transport buffers.
-    int * transporter = (int *)calloc(stride * 4 * cols,sizeof(int));
+    int * transporter = (int *)calloc(rows * cols,sizeof(int));
     // MPI_Request array for sums.
     MPI_Request * sumReq = (MPI_Request *)calloc(3,sizeof(MPI_Request));
     // MPI_Status array for incoming sums.
     MPI_Status * status = (MPI_Status *)calloc(3,sizeof(MPI_Status));
+    // MPI_Request array for matrix.
+    MPI_Request * req = (MPI_Request *)calloc((3 * stride)/gran,sizeof(MPI_Request));
 
     int walker = 0, offset = 0;
 
@@ -102,7 +102,7 @@ int main(int argc, char ** argv)
                 &sumReq[m-1],
                 &status[m-1]
               );
-      for (i = (stride * m); i < stride; i++)
+      for (i = (stride * m); i < (stride * (m+1)); i++)
       {
         printf("line sum for %d = %d,\n",i,finalSums[i]);
       }
@@ -121,13 +121,15 @@ int main(int argc, char ** argv)
         // Sum array
         int * lineSums = (int *)calloc(stride,sizeof(int));
         // MPI_Status array for incoming lines.
-        MPI_Status * status = (MPI_Status *)calloc(stride,sizeof(MPI_Status));
-    MPI_Request r;
-    MPI_Status s;
+        MPI_Status * status = (MPI_Status *)calloc(stride/gran,sizeof(MPI_Status));
+        // MPI_Request array for matrix.
+        MPI_Request * req = (MPI_Request *)calloc(stride/gran,sizeof(MPI_Request));
+    MPI_Request rqs;
+    MPI_Status stt;
 
 
     // Initiate stride/gran Irecvs of buffer size (line_size * gran).
-    printf("Process %d initiating Irecvs\n",world_rank);
+    //printf("Process %d initiating Irecvs\n",world_rank);
     for (i = 0; i < stride/gran; i++)
     {
       MPI_Irecv(
@@ -139,11 +141,12 @@ int main(int argc, char ** argv)
                 MCW,
                 &req[i]
               );
+      //printf("Request %d on process %d initiated\n",i,world_rank);
     }
 
     // Initiate wait for each Irecv in succession and calculate the sum
     // associated with each as it is completed.
-    for (i = 0; i < stride; i++)
+    for (i = 0; i < stride/gran; i++)
     {
       MPI_Wait(
                 &req[i],
@@ -152,6 +155,7 @@ int main(int argc, char ** argv)
       for (j = 0; j < gran; j++)
       {
         lineSums[(i * gran) + j] = calcSum(&matrix[((i * gran) + j) * cols],cols);
+        //printf("lineSums for %lu = %d on %d\n",i * gran,lineSums[(i * gran) + j],world_rank);
       }
     }
 
@@ -160,17 +164,18 @@ int main(int argc, char ** argv)
               lineSums,
               stride,
               MPI_INT,
-              world_rank,
               0,
+              world_rank,
               MCW,
-              &r
+              &rqs
              );
 
     // Wait to deallocate memory until Isend completes.
     MPI_Wait(
-              &r,
-              &s
+              &rqs,
+              &stt
             );
+            
     free(matrix);
     free(lineSums);
     free(status);
