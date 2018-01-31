@@ -38,4 +38,6 @@ void CommLineArgs(int argc,
 
 int isNumber(const char * str);
 
+int calcSum(int * array, int size);
+
 #endif
