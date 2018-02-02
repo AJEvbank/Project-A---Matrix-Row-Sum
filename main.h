@@ -18,6 +18,7 @@
 #define SEED 1
 #define GRAN 100
 #define QUAN 1
+#define PRINT 0
 
 enum isNumStates {
 	INITIAL,
