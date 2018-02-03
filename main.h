@@ -17,8 +17,11 @@
 #define COLS 10000
 #define SEED 1
 #define GRAN 100
-#define QUAN 1
-#define PRINT 0
+#define QUAN u++
+#define PRINT 1
+#define CHECKSUM 1
+
+// (int)(((double)rand())/((double)RAND_MAX) * 32)
 
 enum isNumStates {
 	INITIAL,

@@ -11,7 +11,7 @@ int main(int argc, char ** argv)
 
   CommLineArgs(argc,argv,&rows,&cols,&seed,&gran);
 
-  int i,j,k,m,r = 0,stride = (rows/4),lineStart;
+  int i,j,k,m,r = 0,stride = (rows/4),lineStart,u = 0;
   double start,end;
 
   // Allocate space for arrays.
@@ -34,7 +34,7 @@ int main(int argc, char ** argv)
     // MPI_Request array for matrix.
     MPI_Request * req = (MPI_Request *)calloc((3 * stride)/gran,sizeof(MPI_Request));
 
-    int walker = 0, offset = 0;
+    int walker = 0, offset = 0, checkSumA = 0, checkSumB = 0, checkSumC = 0;
 
     // Loop for (stride/gran) iterations.
     start = MPI_Wtime();
@@ -45,8 +45,10 @@ int main(int argc, char ** argv)
       {
         for (k = 0; k < cols; k++)
         {
+          //TODO: transporter[(((stride * 1) + walker) * cols) + k]
           transporter[(stride * 1) + (walker * cols) + k] = QUAN;
           transporter[(stride * 2) + (walker * cols) + k] = QUAN;
+          printf("transporter[%lu] = %d\n",(stride * 2) + (walker * cols) + k,transporter[(stride * 2) + (walker * cols) + k]);
           transporter[(stride * 3) + (walker * cols) + k] = QUAN;
         }
         walker++;
@@ -106,9 +108,55 @@ int main(int argc, char ** argv)
                 &sumReq[m-1],
                 &status[m-1]
               );
-      for (i = (stride * m); i < (stride * (m+1)); i++)
+      if (PRINT)
       {
-        if (PRINT) printf("line sum for %d = %d,\n",i,finalSums[i]);
+        for (i = (stride * m); i < (stride * (m+1)); i++)
+        {
+          printf("line sum for %d = %d,\n",i,finalSums[i]);
+        }
+      }
+    }
+
+    // Check to make sure finalSums matches the result of brute force
+    // calculation in the transporter array.
+    if (CHECKSUM)
+    {
+      srand(seed);
+      u = 0;
+      walker = 0;
+      for (i = 0; i < (stride/gran); i++)
+      {
+        // Generate 3 * gran lines and simultaneously the summation of each.
+        for (j = 0; j < gran; j++)
+        {
+          checkSumA = 0, checkSumB = 0, checkSumC = 0;
+          for (k = 0; k < cols; k++)
+          {
+            transporter[(stride * 1) + (walker * cols) + k] = QUAN;
+            checkSumA += transporter[(stride * 1) + (walker * cols) + k];
+
+            transporter[(stride * 2) + (walker * cols) + k] = QUAN;
+            checkSumB += transporter[(stride * 2) + (walker * cols) + k];
+            printf("checkSumB = %d, transporter[%lu] = %d\n",checkSumB,(stride * 2) + (walker * cols) + k,transporter[(stride * 2) + (walker * cols) + k]);
+
+            transporter[(stride * 3) + (walker * cols) + k] = QUAN;
+            checkSumC += transporter[(stride * 2) + (walker * cols) + k];
+          }
+          if (checkSumA != finalSums[(stride * 1) + (walker)])
+          {
+            printf("checkSumA != finalSums[%d] where %d != %d\n",(stride * 1) + (walker),checkSumA,finalSums[(stride * 1) + (walker)]);
+          }
+          else if (checkSumB != finalSums[(stride * 2) + (walker)])
+          {
+            printf("checkSumB != finalSums[%d] where %d != %d\n",(stride * 2) + (walker),checkSumB,finalSums[(stride * 2) + (walker)]);
+          }
+          else if (checkSumC != finalSums[(stride * 3) + (walker)])
+          {
+            printf("checkSumC != finalSums[%d] where %d != %d\n",(stride * 3) + (walker),checkSumC,finalSums[(stride * 3) + (walker)]);
+          }
+          walker++;
+        }
+
       }
     }
 
