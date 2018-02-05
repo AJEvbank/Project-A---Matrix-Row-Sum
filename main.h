@@ -16,17 +16,21 @@
 #define ROWS 10000
 #define COLS 10000
 #define SEED 1
-#define GRAN 100
-#define QUAN (int)(((double)rand())/((double)RAND_MAX) * 32)
+#define GRAN 1
+#define QUAN 1
 #define PRINT 0
 #define CHECKSUM 1
+
 #define TIME 0
 #define CORRECT 0
+#define CHECK printf("Check on world_rank %d\n",world_rank);
 
 // (int)(((double)rand())/((double)RAND_MAX) * 32)
 // u++
 // Note: max size of int = +2147483647
 // Note: min size of int = -2147483648
+// Because of this, rows * cols cannot exceed 2147483647, so for a square
+// matrix rows = cols = 46340.
 
 enum isNumStates {
 	INITIAL,
@@ -39,10 +43,10 @@ enum isNumStates {
 
 void CommLineArgs(int argc,
                   char ** argv,
-                  unsigned long *rows,
-                  unsigned long *cols,
-                  unsigned long *seed,
-									unsigned long *gran
+                  int *rows,
+                  int *cols,
+                  int *seed,
+									int *gran
                 );
 
 int isNumber(const char * str);

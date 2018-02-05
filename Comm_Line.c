@@ -6,10 +6,10 @@
 
 void CommLineArgs(int argc,
                   char ** argv,
-                  unsigned long *rows,
-                  unsigned long *cols,
-                  unsigned long *seed,
-                  unsigned long *gran
+                  int *rows,
+                  int *cols,
+                  int *seed,
+									int *gran
                  )
 {
   *rows = ROWS; *cols = COLS; *seed = SEED; *gran = GRAN;
@@ -24,7 +24,6 @@ void CommLineArgs(int argc,
 																};
 	int ch;
 	int opt_index = 0;
-  char * end;
 	while(1)
 	{
 		ch = getopt_long_only(argc,argv,SHORT,OPTS,&opt_index);
@@ -37,10 +36,9 @@ void CommLineArgs(int argc,
     switch(ch)
     {
       case 'r':
-                end = &optarg[strlen(optarg)-1];
                 if(isNumber(optarg))
                 {
-                  *rows = strtoul(optarg,&end,10);
+                  *rows = atoi(optarg);
                 }
                 else
                 {
@@ -48,10 +46,9 @@ void CommLineArgs(int argc,
                 }
                 break;
       case 'c':
-                end = &optarg[strlen(optarg)-1];
                 if(isNumber(optarg))
                 {
-                  *cols = strtoul(optarg,&end,10);
+                  *cols = atoi(optarg);
                 }
                 else
                 {
@@ -59,10 +56,9 @@ void CommLineArgs(int argc,
                 }
                 break;
       case 's':
-                end = &optarg[strlen(optarg)-1];
                 if(isNumber(optarg))
                 {
-                  *seed = strtoul(optarg,&end,10);
+                  *seed = atoi(optarg);
                 }
                 else
                 {
@@ -70,10 +66,9 @@ void CommLineArgs(int argc,
                 }
                 break;
       case 'g':
-                end = &optarg[strlen(optarg)-1];
                 if(isNumber(optarg))
                 {
-                  *gran = strtoul(optarg,&end,10);
+                  *gran = atoi(optarg);
                 }
                 else
                 {
