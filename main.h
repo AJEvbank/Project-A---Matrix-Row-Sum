@@ -46,7 +46,8 @@ void CommLineArgs(int argc,
                   int *rows,
                   int *cols,
                   int *seed,
-									int *gran
+									int *gran,
+                  int *print
                 );
 
 int isNumber(const char * str);

@@ -9,10 +9,11 @@ void CommLineArgs(int argc,
                   int *rows,
                   int *cols,
                   int *seed,
-									int *gran
+									int *gran,
+                  int *print
                  )
 {
-  *rows = ROWS; *cols = COLS; *seed = SEED; *gran = GRAN;
+  *rows = ROWS; *cols = COLS; *seed = SEED; *gran = GRAN, *print = PRINT;
   static char * SHORT = "";
 	static struct option OPTS[] =
 																{
@@ -20,6 +21,7 @@ void CommLineArgs(int argc,
                                   {"cols",required_argument,0,'c'},
                                   {"seed",required_argument,0,'s'},
                                   {"gran",required_argument,0,'g'},
+                                  {"print",no_argument,0,'p'},
 																	{0,0,0,0}
 																};
 	int ch;
@@ -74,6 +76,9 @@ void CommLineArgs(int argc,
                 {
                   *gran = GRAN;
                 }
+                break;
+      case 'p':
+                *print = 1;
                 break;
       default:
                 printf("default case\n");

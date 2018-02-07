@@ -7,12 +7,11 @@ int main(int argc, char ** argv)
   MPI_Comm_rank(MCW, &world_rank);
   int world_size;
   MPI_Comm_size(MCW, &world_size);
-  int rows,cols,seed,gran;
+  int rows,cols,seed,gran,print;
 
-  CommLineArgs(argc,argv,&rows,&cols,&seed,&gran);
+  CommLineArgs(argc,argv,&rows,&cols,&seed,&gran,&print);
 
   int i,j,k,m,r = 0,stride = (rows/4),lineStart;
-  double start,end;
 
   // Allocate space for arrays.
 
@@ -33,11 +32,11 @@ int main(int argc, char ** argv)
     // MPI_Request array for matrix.
     MPI_Request * req = (MPI_Request *)calloc((3 * stride)/gran,sizeof(MPI_Request));
 
-    int walker = 0, offset = 0, checkSumA = 0, checkSumB = 0, checkSumC = 0;
+    printf("world_size = %d, world_rank = %d, print = %d, gran = %d, rows = %d, cols = %d\n",world_size,world_rank,print,gran,rows,cols);
+    int walker = 0, offset = 0, checkSumA = 0, checkSumB = 0, checkSumC = 0, incorrect = 0;
 
-    
+
     // Loop for (stride/gran) iterations.
-    if (TIME) start = MPI_Wtime();
     for (i = 0; i < (stride/gran); i++)
     {
       // Generate 3 * gran lines.
@@ -68,8 +67,6 @@ int main(int argc, char ** argv)
       }
       offset += gran;
     }
-    if (TIME) end = MPI_Wtime();
-    if (TIME) printf("Big loop time = %lf\n",end-start);
 
     // Initiate Irecvs for line sums from other processes.
     for (m = 1; m <= 3; m++)
@@ -87,7 +84,7 @@ int main(int argc, char ** argv)
 
     // Generate native lines for rank 0 and calculate sums.
     // Results are displayed as calculated.
-    printf("Results: \n");
+    if (print) printf("Results: \n");
     for (i = 0; i < stride; i++)
     {
       lineStart = i * cols;
@@ -96,18 +93,17 @@ int main(int argc, char ** argv)
         transporter[lineStart + j] = QUAN;
         finalSums[i] += transporter[lineStart + j];
       }
-      if (PRINT) printf("line sum for %d = %d,\n",i,finalSums[i]);
+      if (print) printf("line sum for %d = %d,\n",i,finalSums[i]);
     }
 
     // Wait until all Ircevs are completed and display results.
     for (m = 1; m <= 3; m++)
     {
-      printf("Waiting...\n");
       MPI_Wait(
                 &sumReq[m-1],
                 &status[m-1]
               );
-      if (PRINT)
+      if (print)
       {
         for (i = (stride * m); i < (stride * (m+1)); i++)
         {
@@ -115,12 +111,13 @@ int main(int argc, char ** argv)
         }
       }
     }
+    printf("Calculations complete.\n");
 
     // Check to make sure finalSums matches the result of brute force
     // calculation in the transporter array.
     if (CHECKSUM)
     {
-      srand(seed);
+      printf("Checking results...\n");
       walker = 0;
       for (i = 0; i < (stride/gran); i++)
       {
@@ -137,29 +134,29 @@ int main(int argc, char ** argv)
           if (checkSumA != finalSums[(stride * 1) + walker])
           {
             printf("checkSumA != finalSums[%d] where %d != %d\n",(stride * 1) + walker,checkSumA,finalSums[(stride * 1) + walker]);
-          }
-          else
-          {
-            if (CORRECT) printf("%d == %d\n",checkSumA,finalSums[(stride * 1) + walker]);
+            incorrect++;
           }
           if (checkSumB != finalSums[(stride * 2) + walker])
           {
             printf("checkSumB != finalSums[%d] where %d != %d\n",(stride * 2) + walker,checkSumB,finalSums[(stride * 2) + walker]);
-          }
-          else
-          {
-            if (CORRECT) printf("%d == %d\n",checkSumB,finalSums[(stride * 2) + walker]);
+            incorrect++;
           }
           if (checkSumC != finalSums[(stride * 3) + walker])
           {
             printf("checkSumC != finalSums[%d] where %d != %d\n",(stride * 3) + walker,checkSumC,finalSums[(stride * 3) + walker]);
-          }
-          else
-          {
-            if (CORRECT) printf("%d == %d\n",checkSumC,finalSums[(stride * 3) + walker]);
+            incorrect++;
           }
           walker++;
         }
+      }
+      printf("Result check complete.\n");
+      if (incorrect == 0)
+      {
+        printf("There were no errors in the results.\n");
+      }
+      else
+      {
+        printf("There were %d errors in the results.\n",incorrect);
       }
     }
 
@@ -184,8 +181,6 @@ int main(int argc, char ** argv)
 
 
     // Initiate stride/gran Irecvs of buffer size (line_size * gran).
-    //printf("Process %d initiating Irecvs\n",world_rank);
-    if (TIME) start = MPI_Wtime();
     for (i = 0; i < stride/gran; i++)
     {
       MPI_Irecv(
@@ -197,28 +192,21 @@ int main(int argc, char ** argv)
                 MCW,
                 &req[i]
               );
-      //printf("Request %d on process %d initiated\n",i,world_rank);
     }
-    if (TIME) end = MPI_Wtime();
-    if (TIME) printf("Irecv loop on %d = %lf\n",world_rank,end-start);
 
     // Initiate wait for each Irecv in succession and calculate the sum
     // associated with each as it is completed.
-    if (TIME) start = MPI_Wtime();
     for (i = 0; i < stride/gran; i++)
     {
       MPI_Wait(
                 &req[i],
                 &status[i]
               );
-      if (TIME) {if (i == 0) end = MPI_Wtime();}
       for (j = 0; j < gran; j++)
       {
         lineSums[(i * gran) + j] = calcSum(&matrix[((i * gran) + j) * cols],cols);
-        //printf("lineSums for %lu = %d on %d\n",i * gran,lineSums[(i * gran) + j],world_rank);
       }
     }
-    if (TIME) printf("First wait complete on %d at %lf\n",world_rank,end-start);
 
     // Initiate Isend when line totals are completed.
     MPI_Isend(
