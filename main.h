@@ -17,7 +17,7 @@
 #define COLS 10000
 #define SEED 1
 #define GRAN 1
-#define QUAN 1
+#define QUAN (int)(((double)rand())/((double)RAND_MAX) * 32)
 #define PRINT 0
 #define CHECKSUM 1
 

@@ -2,6 +2,6 @@
 
 clear
 make
-
+clear
 echo "************************************************************************************************************************************************"
-time mpirun -np 4 ./main -gran 1 -seed 42 -print #-rows 46340 -cols 46340
+time mpirun -np 4 ./main -gran 1 -seed 42 -print -rows 46340 -cols 46340

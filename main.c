@@ -13,7 +13,6 @@ int main(int argc, char ** argv)
 
   int i,j,k,m,r = 0,stride = (rows/4),lineStart;
 
-  // Allocate space for arrays.
 
 
   MPI_Barrier(MCW);
@@ -32,7 +31,8 @@ int main(int argc, char ** argv)
     // MPI_Request array for matrix.
     MPI_Request * req = (MPI_Request *)calloc((3 * stride)/gran,sizeof(MPI_Request));
 
-    printf("world_size = %d, world_rank = %d, print = %d, gran = %d, rows = %d, cols = %d\n",world_size,world_rank,print,gran,rows,cols);
+    printf("\n");
+    printf("world_size = %d, world_rank = %d, print = %d, gran = %d, rows = %d, cols = %d, seed = %d\n",world_size,world_rank,print,gran,rows,cols,seed);
     int walker = 0, offset = 0, checkSumA = 0, checkSumB = 0, checkSumC = 0, incorrect = 0;
 
 
@@ -111,6 +111,7 @@ int main(int argc, char ** argv)
         }
       }
     }
+    printf("\n");
     printf("Calculations complete.\n");
 
     // Check to make sure finalSums matches the result of brute force
@@ -152,7 +153,7 @@ int main(int argc, char ** argv)
       printf("Result check complete.\n");
       if (incorrect == 0)
       {
-        printf("There were no errors in the results.\n");
+        printf("There were NO ERRORS in the results.\n");
       }
       else
       {

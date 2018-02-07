@@ -1,31 +1,32 @@
 #! /bin/bash
-#make
-#clear
+clear
+make
 echo "**************************************************************************************************************************************"
-time mpirun -np 4 ./main -gran 2500
-time mpirun -np 4 ./main -gran 2500
-echo "**************************************************************************************************************************************"
-
-time mpirun -np 4 ./main -gran 1250
-time mpirun -np 4 ./main -gran 1250
+time mpirun -np 4 ./main -gran 2500 -seed 1
+time mpirun -np 4 ./main -gran 2500 -seed 2
 echo "**************************************************************************************************************************************"
 
-time mpirun -np 4 ./main -gran 625
-time mpirun -np 4 ./main -gran 625
+time mpirun -np 4 ./main -gran 1250 -seed 3
+time mpirun -np 4 ./main -gran 1250 -seed 4
 echo "**************************************************************************************************************************************"
 
-time mpirun -np 4 ./main -gran 250
-time mpirun -np 4 ./main -gran 250
+time mpirun -np 4 ./main -gran 625 -seed 5
+time mpirun -np 4 ./main -gran 625 -seed 6
 echo "**************************************************************************************************************************************"
 
-time mpirun -np 4 ./main -gran 125
-time mpirun -np 4 ./main -gran 125
+time mpirun -np 4 ./main -gran 250 -seed 7
+time mpirun -np 4 ./main -gran 250 -seed 8
 echo "**************************************************************************************************************************************"
 
-time mpirun -np 4 ./main -gran 25
-time mpirun -np 4 ./main -gran 25
+time mpirun -np 4 ./main -gran 125 -seed 9
+time mpirun -np 4 ./main -gran 125 -seed 10
 echo "**************************************************************************************************************************************"
 
-time mpirun -np 4 ./main -gran 1
-time mpirun -np 4 ./main -gran 1
+time mpirun -np 4 ./main -gran 25 -seed 11
+time mpirun -np 4 ./main -gran 25 -seed 12
 echo "**************************************************************************************************************************************"
+
+time mpirun -np 4 ./main -gran 1 -seed 13
+time mpirun -np 4 ./main -gran 1 -seed 14
+echo "**************************************************************************************************************************************"
+echo Done
