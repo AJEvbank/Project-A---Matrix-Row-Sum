@@ -95,3 +95,14 @@ discovered, then an alert with the relevant figures is displayed.
 Notes:
 Because of the maximum size of the int data type in C, the user should ensure
 that rows * cols < 2147483647.
+
+Performance Survey: We've run a set of performance tests using the go_long.sh
+script. The arguments for the program were as follows:
+          -rows 46340 -cols 46340 -gran [11585,2317,1655,331,35,7,1]
+Performance did not change appreciably using different values of gran for the
+problem. Note that this is the largest matrix possible for the program. An
+improved performance time might suggest an optimal value of gran for the
+program. However, the problem itself is somewhat imbalanced because most of the
+work must be done on process 0. Inevitably the other processes must wait on
+process 0 because they are only required to execute simple addition. This
+probably outweighs any benefit of overlapping.
